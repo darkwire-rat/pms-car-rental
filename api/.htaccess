@@ -1,0 +1,33 @@
+# --- Authorization header passthrough -------------------------------------
+# Apache does not export the Authorization header to PHP by default, so every
+# bearer-authenticated /api/v1 endpoint would see no token. CGIPassAuth (Apache
+# 2.4.13+) and the rewrite fallback below both restore it. api/v1/common/auth.php
+# also reads the header directly, so the API still works if neither is honoured.
+<IfModule mod_setenvif.c>
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+<IfModule mod_cgi.c>
+  CGIPassAuth On
+</IfModule>
+
+# --- Hardening ------------------------------------------------------------
+# No directory listings: /api/v1/common/ was enumerable, disclosing the shared
+# include filenames.
+Options -Indexes
+
+# common/ holds includes only (bootstrap, auth, response) — they are never a
+# valid request target, only require_once'd by the endpoints above them.
+<FilesMatch "^(bootstrap|auth|response)\.php$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>

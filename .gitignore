@@ -1,0 +1,35 @@
+# Backups made during the Sept 2026 DB-credential switch (local Laragon vs
+# Hostinger). Both contain the live Hostinger DB password in cleartext —
+# never track these. See docs/FUNCTIONAL_REVISION_ANALYSIS.md §1.2.
+# Superseded by config.local.php below (Phase 17 item 2) — kept ignored
+# since they still exist on disk from before that change.
+db.php.hostinger.bak
+db_connect.php.hostinger.bak
+
+# Phase 17: the database connection credential, one per environment. Never
+# commit this — copy config.local.php.example and fill in real values.
+config.local.php
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# PHP error logs, if any get written locally
+*.log
+
+# Full-database backup dumps taken before risky migrations (Phase 2+).
+# Contain user password hashes and full booking/user data — local safety
+# nets only, not meant to be tracked or grow the repo indefinitely.
+db_migrations/backups/
+
+# Customer-uploaded verification documents (Phase 7). Private user content —
+# the directories and their deny-all .htaccess are tracked, the images are not.
+uploads/licenses/*
+uploads/verification/*
+assets/licenses/*
+assets/avatars/*
+!uploads/licenses/.htaccess
+!uploads/verification/.htaccess
+!assets/licenses/.htaccess

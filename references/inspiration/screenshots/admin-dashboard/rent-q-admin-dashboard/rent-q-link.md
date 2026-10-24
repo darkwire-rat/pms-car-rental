@@ -1,0 +1,1 @@
+rent-q link: https://templates.envytheme.com/rentq/dashboard.html 

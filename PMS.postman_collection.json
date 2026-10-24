@@ -1,0 +1,321 @@
+{
+  "info": {
+    "name": "PMS Car Rental API",
+    "description": "The versioned /api/v1 JSON API documented in docs/API.md. Bearer-token auth (api_tokens table) — separate from the browser's session-cookie auth used by the rest of the site. Run Auth > Login (or Register) first: its test script captures the returned token into the {{token}} collection variable, which every authenticated request below sends as `Authorization: Bearer {{token}}`. Swap {{base_url}} for the hosted URL once deployed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost/pms-revised" },
+    { "key": "token", "value": "" },
+    { "key": "vehicle_id", "value": "1" },
+    { "key": "booking_id", "value": "" },
+    { "key": "pickup_location_id", "value": "1" },
+    { "key": "dropoff_location_id", "value": "2" },
+    { "key": "policy_version", "value": "1.0" },
+    { "key": "voucher_code", "value": "SAVE300" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token', body.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\",\n  \"privacy_consent\": true\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/register.php"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token', body.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/auth/login.php"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/auth/me.php"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('token', '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/auth/logout.php"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Show profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/profile/show.php"
+          }
+        },
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/profile/update.php"
+          }
+        },
+        {
+          "name": "Change password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"password123\",\n  \"new_password\": \"password123\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/profile/change-password.php"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "List vehicles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/vehicles/index.php"
+          }
+        },
+        {
+          "name": "List vehicles by category",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/vehicles/index.php?category=Sedan"
+          }
+        },
+        {
+          "name": "Search vehicles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/vehicles/index.php?search=Civic"
+          }
+        },
+        {
+          "name": "Vehicle detail",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/vehicles/show.php?id={{vehicle_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vouchers",
+      "item": [
+        {
+          "name": "List available vouchers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/vouchers/index.php"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Preview booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": {{vehicle_id}},\n  \"rental_date\": \"2027-06-10\",\n  \"return_date\": \"2027-06-12\",\n  \"pickup_time\": \"09:00:00\",\n  \"dropoff_time\": \"09:00:00\",\n  \"pickup_location_id\": {{pickup_location_id}},\n  \"dropoff_location_id\": {{dropoff_location_id}},\n  \"voucher_code\": \"\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/bookings/preview.php"
+          }
+        },
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('booking_id', body.data.booking_id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": {{vehicle_id}},\n  \"rental_date\": \"2027-06-10\",\n  \"return_date\": \"2027-06-12\",\n  \"pickup_time\": \"09:00:00\",\n  \"dropoff_time\": \"09:00:00\",\n  \"contact_number\": \"09171234567\",\n  \"age\": 25,\n  \"pickup_location_id\": {{pickup_location_id}},\n  \"dropoff_location_id\": {{dropoff_location_id}},\n  \"policy_accepted\": true,\n  \"policy_version\": \"{{policy_version}}\"\n}"
+            },
+            "url": "{{base_url}}/api/v1/bookings/create.php"
+          }
+        },
+        {
+          "name": "List my bookings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/bookings/index.php"
+          }
+        },
+        {
+          "name": "Booking detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/bookings/show.php?id={{booking_id}}"
+          }
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{booking_id}}\n}"
+            },
+            "url": "{{base_url}}/api/v1/bookings/cancel.php"
+          }
+        },
+        {
+          "name": "Early return",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": {{booking_id}}\n}"
+            },
+            "url": "{{base_url}}/api/v1/bookings/early-return.php"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List transactions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/transactions/index.php"
+          }
+        },
+        {
+          "name": "Transaction detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/transactions/show.php?booking_id={{booking_id}}"
+          }
+        },
+        {
+          "name": "Receipt (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/v1/transactions/receipt.php?booking_id={{booking_id}}"
+          }
+        },
+        {
+          "name": "Receipt (PDF)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/transactions/receipt-pdf.php?booking_id={{booking_id}}&token={{token}}"
+          }
+        }
+      ]
+    }
+  ]
+}

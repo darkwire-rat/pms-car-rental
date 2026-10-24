@@ -1,0 +1,27 @@
+<?php
+// Copy this file to config.local.php (same directory) and fill in the real
+// values for this environment. config.local.php is gitignored and must
+// never be committed — it's the only place the database connection
+// credential lives now (Phase 17 item 2, closing Phase 0's outstanding
+// item 7). Both db.php (PDO) and db_connect.php (mysqli) read this same
+// file, so there is exactly one place to update per environment.
+//
+// This covers the database connection credential ONLY. It has nothing to
+// do with the application's admin login (the `admins` table, checked by
+// admin-login.php) — that is a separate concern and this file must never
+// be used to change it.
+return [
+    'host'    => 'localhost',
+    'db'      => 'pms_connection',
+    'user'    => 'root',
+    'pass'    => '',
+    'charset' => 'utf8mb4',
+    // PayMongo is the only supported payment provider.
+    'payment_provider'        => 'paymongo',
+    'app_base_url'             => 'https://your-domain.example',
+    'paymongo_secret_key'     => '',
+    'paymongo_webhook_secret' => '',
+    // Secret URL keyword for admin-login.php?key=... (empty = admin login disabled).
+    'admin_access_key'        => '',
+    'paymongo_payment_methods' => ['card', 'gcash', 'paymaya', 'grab_pay', 'qrph'],
+];
